@@ -1,0 +1,1155 @@
+<html lang="id" class="bg-gradient-to-tr from-blue-100 via-purple-200 to-pink-100 flex flex-col items-center justify-center min-h-screen font-poppins px-4">
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>XOX Game</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+  <style>
+    body, html {
+      margin: 0; padding: 0; height: 100%;
+      overflow: hidden; width: 100%;
+      font-family: 'Poppins', sans-serif;
+      user-select: none; align-items: center
+      ; justify-content: center; 
+    }
+
+    /* Animasi untuk tombol */
+    @keyframes slideOut {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(0);
+        opacity: 0;
+      }
+    }
+    /* Animasi untuk elemen main */
+    @keyframes slideIn {
+      0% {
+        transform: translateY(0%) scale(0);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+    }
+    /* Main game styles */
+    #game {
+      border-radius: 1.3rem;
+      bottom: 140;
+      padding: 60;
+      position: fixed;
+      width: 85%;
+      height: 70%;
+      align-items: center;
+      justify-content: center;
+      display: none; /* Sembunyikan elemen main pada awal */
+      transform: translateY(0%); /* Posisikan elemen di tengah */
+      opacity: 0; /* Sembunyikan elemen */
+    }
+
+    
+    #menu {
+  position: fixed;
+  align-items: center;
+  justify-content: center;
+  width: 85%;
+  height: 45%;
+    }
+    
+    #resetTotal {
+        display: none;
+        position: fixed;
+        bottom: 75;
+    }
+    
+       @keyframes pulseRedGlow {
+      0%, 100% {
+        text-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
+        color: #dc2626;
+      }
+      50% {
+        text-shadow: 0 0 20px rgba(239, 68, 68, 1);
+        color: #b91c1c;
+      }
+    }
+    @keyframes pulseBlueGlow {
+      0%, 100% {
+        text-shadow: 0 0 8px rgba(59, 130, 246, 0.8);
+        color: #2563eb;
+      }
+      50% {
+        text-shadow: 0 0 20px rgba(59, 130, 246, 1);
+        color: #1e40af;
+      }
+    } 
+    
+    .pulse-red {
+      animation: pulseRedGlow 1.5s ease-in-out infinite;
+    }
+    .pulse-blue {
+      animation: pulseBlueGlow 1.5s ease-in-out infinite;
+    }
+    .rotate-gear { animation: rotateGear 2s linear infinite; 
+    }
+    
+ /* Button styling to match your original */
+    .action-button {
+      background: transparent;
+      color: #1f2937;
+      transition: all 0.3s ease;
+      padding: 0.75rem;
+      border-radius: 50%;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .action-button:hover {
+      transform: scale(1.15);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .action-button.active {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.7);
+    }
+    
+    /* Turn indicator container */
+    #turn-indicator {
+      width: 100%;
+      max-width: 10;
+      margin-bottom: 1.5rem;
+      user-select: none;
+      position: relative;
+      height: 3rem;
+      display: none;
+    }
+    /* Red top bar */
+    #turn-indicator .red-bar {
+      position: fixed;
+      padding: 15;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4.1rem;
+      background: linear-gradient(90deg, #dc2626, #ef4444);
+      border-radius: 0.0rem 0.0rem 1rem 1rem;
+      box-shadow: 0 0 10px #ef4444;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      display: flex;
+      align-items: center;
+      justify-content: right;
+      color: white;
+      font-weight: 0;
+      font-size: 1rem;
+      letter-spacing: 0.00em;
+      user-select: none;
+    }
+    /* Blue bottom bar */
+    #turn-indicator .blue-bar {
+      position: fixed;
+      padding: 15;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4.1rem;
+      background: linear-gradient(90deg, #2563eb, #3b82f6);
+      border-radius: 1rem 1rem 0.0rem 0.0rem;
+      box-shadow: 0 0 10px #3b82f6;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      display: flex;
+      align-items: center;
+      justify-content: left;
+      color: white;
+      font-weight: 100;
+      font-size: 1rem;
+      letter-spacing: 0.05em;
+      user-select: none;
+    }
+    /* Show bars */
+    #turn-indicator.show-red .red-bar {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    #turn-indicator.show-blue .blue-bar {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    #turn-indicator.show-both .red-bar,
+    #turn-indicator.show-both .blue-bar {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    /* Animasi tombol smooth */
+  .tombol-interaktif {
+    transition: transform 100ms ease-out;
+    transform: scale(1);
+  }
+  .tombol-interaktif:active {
+  transform: scale(1.15);
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+  filter: brightness(95%);
+  }
+  
+  /* Untuk X bantuan */
+.hint-x {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #facc15; /* kuning */
+  animation: pulseHint 1s ease-in-out infinite;
+}
+
+/* Untuk O bantuan */
+.hint-o {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #facc15;
+  animation: pulseHint 1s ease-in-out infinite;
+}
+
+@keyframes pulseHint {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.08);
+  }
+}
+  
+  @keyframes hintFlash {
+  0%, 100% { background-color: #facc15; } /* kuning terang */
+  50% { background-color: #fde68a; }      /* kuning lembut */
+}
+.hint-x, .hint-o {
+  animation: pulseHint 2s ease-in-out infinite; /* ✅ lebih pelan */
+  pointer-events: none;
+}  
+
+.disabled-button {
+  opacity: 0.5;
+  filter: grayscale(100%);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none !important;
+  transition: all 0.3s ease;
+  /* pointer-events: none; ❌ JANGAN ADA INI */
+}
+
+#switchOverlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  cursor: not-allowed;
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 50;
+}
+
+#helpOverlay {
+  background: transparent;
+  cursor: not-allowed;
+}
+#board {
+  display: grid;
+  gap: 1rem;
+}
+
+.hp-container {
+  position: relative;
+  width: 80%;
+  height: 12px;
+  background: #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+}
+
+.hp-bar {
+  height: 100%;
+  width: 100%; /* awalnya full */
+  transition: width 0.3s ease;
+  border-radius: 8px;
+  position: relative;
+  z-index: 2;
+}
+.dmg-text-right {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #f87171;
+  animation: dmgFloat 1s ease forwards;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes dmgFloat {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  30% {
+    transform: translateY(-6px) scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.9);
+  }
+}
+.hp-lost {
+  position: absolute;
+  left: 0;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+  transition: width 0.3s ease;
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+.Ochar, .Xchar {
+    font-size: 3.5rem;
+}
+
+#hpOText, #hpXText {
+    font-size: 0.8rem;
+}
+
+#undoButton {
+  transition: opacity 0.3s ease;
+}
+
+  </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen px-4">
+    
+<!-- TURN INDICATOR WRAPPER -->
+<div id="turn-indicator" class="fixed inset-0 items-center gap-2">
+
+  <!-- PLAYER X - ATAS (dibalik) -->
+  <div class="red-bar absolute top-4 right-4 w-full flex flex-row-reverse items-center justify-center gap-2">
+      
+    <!-- Label -->
+    <span class="Xchar font-bold text-white rotate-180">X</span>
+    
+    <div class="rotate-180">
+            <!-- HP Value -->
+    <span id="hpXText" class="text-white text-sm font-bold rotate-180">100</span>
+    <!-- HP Bar -->
+    <div class="relative w-28 h-4 bg-red-300 rounded-full overflow-hidden border-2 border-white">
+          
+      <!-- Dummy bar -->
+      <div id="hpLostX" class="hp-lost bg-green-400 absolute top-0 left-0 h-full z-10 rounded-full overflow-hidden" style="width: 100%">
+        <span id="dmgTextX" class="dmg-text-inside hidden rotate-180">-10</span>
+      </div>
+      <!-- Main HP bar -->
+      <div id="hpX" class="hp-bar bg-red-600 h-full z-20" style="width: 100%"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PLAYER O - BAWAH (normal) -->
+  <div class="blue-bar w-full left-4 gap-2">
+    <!-- Label -->
+    <span class="Ochar font-bold text-white">O</span>
+    <div>
+    <!-- HP Value -->
+    <span id="hpOText" class="text-white text-sm font-bold">100</span>
+    <!-- HP Bar -->
+    <div class="relative w-28 h-4 bg-blue-300 rounded-full overflow-hidden border-2 border-white">
+
+      <!-- Dummy bar -->
+      <div id="hpLostO" class="hp-lost bg-green-400 absolute top-0 left-0 h-full z-10 rounded-full overflow-hidden" style="width: 100%">
+        <span id="dmgTextO" class="dmg-text-inside hidden">-10</span>
+      </div>
+      <!-- Main HP bar -->
+      <div id="hpO" class="hp-bar bg-blue-600 h-full z-20" style="width: 100%"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      
+<!-- Halaman Menu -->
+  <div id="menu" class="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-10 w-80 max-w-full text-center relative ring-1 ring-white/30 w-full max-w-md mx-auto">
+    <h1 class="text-4xl font-extrabold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-pink-600 via-purple-700 to-blue-700 tracking-widest drop-shadow-lg select-none">Select Mode</h1>
+    <button id="two-player" class="mt-10 bg-gradient-to-r from-white-600 via-white-700 to-white-800 text-black font-extrabold py-4 px-8 rounded-3xl tracking-wider shadow-lg transition-transform transform hover:scale-1 focus:outline-none focus:ring-0 focus:ring-none-400 focus:ring-offset-0 focus:ring-offset-none">
+      <i class="fas fa-users mr-2"></i> play with bro
+    </button>
+    <button id="versus-ai" class="mt-4 bg-gradient-to-tr from-blue-100 via-purple-200 to-pink-100 text-black font-extrabold py-4 px-8 rounded-3xl tracking-wider shadow-lg transition-transform transform hover:scale-1 focus:outline-none focus:ring-0 focus:ring-none-400 focus:ring-offset-0 focus:ring-offset-none">
+      <i class="fas fa-robot mr-2"></i> vsAI
+    </button>
+  </div>
+
+
+  <!-- Game Main -->
+  <section class="hidden w-full max-w-md bg-white rounded-x1 shadow-lg p-6 flex flex-col items-center animate-slideIn opacity-0" id="game">
+      <h1 class="text-4xl font-extrabold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-pink-600 via-purple-700 to-blue-700 tracking-widest drop-shadow-lg select-none">X O X</h1> 
+   <div class="flex justify-center items-center w-full mb-4">
+    <h2 class="text-lg font-semibold text-gray-700 select-none items-center justify-center" id="status">
+     Giliran pemain: X
+    </h2>
+   </div>
+   
+       <div id="board" class="grid gap-4 w-full max-w-sm mt-4">
+  <!-- Isi tombol cell akan dimasukkan lewat JS -->
+    </div>
+   <!-- Board Grid --><div id="board" class="grid gap-4 w-full max-w-sm mt-4"></div>
+
+    <!-- Updated button container -->
+    <div class="flex justify-center items-center space-x-6 mt-10">
+<!-- Switch Turn / Undo (akan berubah dinamis) -->
+<div class="switch-wrapper relative inline-block">
+  <button id="switchTurnButton" aria-label="Ganti Giliran" class="action-button focus:outline-none w-10 h-10">
+    <i class="fas fa-sync-alt fa-xl"></i>
+  </button>
+  <div id="switchOverlay" class="absolute inset-0 z-10 hidden"></div>
+  <!-- UNDO -->
+<button id="undoButton" onclick="handleUndo()" class="action-button focus:outline-none w-10 h-10n hidden" aria-label="Undo langkah terakhir">
+  <i class="fas fa-undo-alt fa-xl"></i>
+</button>
+</div>
+
+
+
+            <!-- Main Lagi (Center) -->
+      <button id="reset" aria-label="mulai permainan lagi"
+              class="bg-gradient-to-tr from-blue-100 via-purple-200 to-pink-100 text-black font-extrabold py-3 px-6 rounded-2xl tracking-wider shadow-lg transition-transform hover:scale-105 focus:outline-none focus:ring-0">
+        <i class="fas fa-redo-alt mr-2"></i> Main Lagi?
+      </button>
+      
+      <div class="help-wrapper relative">
+<button id="helpButton" aria-label="Bantuan Strategi"
+        class="action-button focus:outline-none">
+  <i class="fas fa-lightbulb fa-xl text-yellow-400"></i>
+</button>
+  <div id="helpOverlay" class="absolute inset-0 z-10 hidden"></div>
+</div>
+
+  </section>
+
+<button id="resetTotal" aria-label="reset total dan bisa switch turn lagi"
+        class="bg-gradient-to-tr from-blue-100 via-purple-200 to-pink-100 text-black font-extrabold py-3 px-6 rounded-2xl tracking-wider shadow-lg action-button transition-transform hover:scale-105 focus:outline-none focus:ring-0">Reset</button>
+        
+<div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-black/70 text-white text-sm rounded-xl shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50"></div>
+
+  <script>
+   (() => {
+            // Game elements
+            const menu = document.getElementById('menu');
+            const gameMain = document.getElementById('game');
+            const switchTurnButton = document.getElementById('switchTurnButton');
+            const resetTotalButton = document.getElementById('resetTotal');
+            const status = document.getElementById('status');
+            const turnIndicator = document.getElementById('turn-indicator');
+            const resetBtn = document.getElementById('reset');
+            const helpOverlay = document.getElementById('helpOverlay');
+            const switchOverlay = document.getElementById('switchOverlay');
+            
+            let isVersusAI = false, playerMark = 'X'
+            let preventSwitchTurn = false; // Mencegah switch turn saat game berjalan
+            let aiStarted = false;
+            let aiPlayer = 'O'; // Default AI sebagai 'O'
+            let skorPlayer = 0;
+            let skorAI = 0;
+            let hasGameStarted = false;
+            let canClick = true;
+            let hintUsedX = false;
+            let hintUsedO = false;
+            let boardSize = 3; // awal mula 2x2
+            let board = [];
+            let cells = [];
+            let hpX = 100;
+            let hpO = 100;
+            let undoUsedX = false;
+            let undoUsedO = false;
+            let lastMove = null; // index terakhir
+            let lastMoveBy = null;
+
+
+            document.getElementById('two-player').addEventListener('click', () => {
+                isVersusAI = false;
+                startGame();
+            });
+            document.getElementById('versus-ai').addEventListener('click', () => {
+                isVersusAI = true;
+                
+                startGame();
+            });
+
+            // Function to start the game
+            function startGame() {
+                menu.style.animation = 'slideOut 0.5s forwards';
+                setTimeout(() => {
+                    menu.style.display = 'none';
+                    gameMain.style.display = 'flex';
+                    gameMain.style.animation = 'slideIn 0.5s forwards';
+                    gameMain.style.opacity = 1;
+                    resetTotal.style.display = 'block';
+                    resetTotal.style.animation = 'slideIn 0.5s forwards';
+                    resetTotal.style.opacity = 1;
+                    turnIndicator.style.display = 'block';
+                    showBothBars();
+                    
+                    switchOverlay.addEventListener('click', () => {
+  showToast("Switch Turn hanya bisa dipakai sebelum permainan dimulai!");
+});
+                }, 500);
+                generateBoard(boardSize);
+                updateHelpButtonState();
+                updateSwitchButtonState();
+            }
+            
+            function updateHPUI() {
+  document.getElementById('hpX').style.width = `${hpX}%`;
+  document.getElementById('hpXText').textContent = hpX;
+
+  document.getElementById('hpO').style.width = `${hpO}%`;
+  document.getElementById('hpOText').textContent = hpO;
+}
+
+// Contoh: saat X menang
+function reduceOHP(damage = 20) {
+  hpO = Math.max(hpO - damage, 0);
+  updateHPUI();
+}
+
+function showDamage(player, damage = 10) {
+  const text = document.getElementById(player === 'X' ? 'hpXText' : 'hpOText');
+  const hp = player === 'X' ? hpX : hpO;
+  const finalHP = Math.max(0, hp - damage);
+
+  // Ganti warna sesuai damage
+  text.style.color = player === 'X' ? '#3b82f6' : '#ef4444'; // biru atau merah
+  text.textContent = `-${damage}`;
+  
+  // Tunda transisi balik ke angka HP sampai bar selesai animasi
+  setTimeout(() => {
+    animateHPText(text, hp, finalHP);
+    
+    // update skor global juga
+    if (player === 'X') {
+      hpX = finalHP;
+    } else {
+      hpO = finalHP;
+    }
+  }, 400); // tunda biar bar dummy selesai
+}
+
+function animateHPText(el, from, to) {
+  let current = from;
+  const step = () => {
+    if (current > to) {
+      current--;
+      el.textContent = current;
+      requestAnimationFrame(step);
+    } else {
+      el.textContent = to;
+      el.style.color = 'white'; // reset warna
+    }
+  };
+  step();
+}
+
+
+
+function updateHP(player, hp) {
+  const hpValue = Math.max(0, Math.min(100, hp));
+  const bar = document.getElementById(player === 'X' ? 'hpX' : 'hpO');
+  const text = document.getElementById(player === 'X' ? 'hpXText' : 'hpOText');
+
+  bar.style.width = `${hpValue}%`;
+  text.textContent = hpValue;
+
+  // Delay biar dummy ngikut setelah HP utama
+  setTimeout(() => {
+    updateLostHP(player, hpValue);
+  }, 300);
+}
+
+function updateLostHP(player, hpValue) {
+  const dummy = document.getElementById(player === 'X' ? 'hpLostX' : 'hpLostO');
+  dummy.style.width = `${hpValue}%`;
+}
+            
+            
+            function generateBoard(size) {
+  const boardContainer = document.getElementById('board');
+
+  boardContainer.innerHTML = ''; // hapus isi lama
+  boardContainer.style.gridTemplateColumns = `repeat(${size}, 1fr)`; // 💥 Atur kolom
+
+  board.length = 0; // reset data board
+
+  for (let i = 0; i < size * size; i++) {
+    board.push(null);
+
+    const button = document.createElement('button');
+    button.className = 'cell cursor-pointer bg-gray-100 rounded-lg aspect-square flex items-center justify-center text-4xl font-extrabold text-gray-900 hover:scale-110 hover:shadow-xl transition select-none';
+    button.dataset.index = i;
+    button.onclick = handleCellClick;
+    boardContainer.appendChild(button);
+  }
+if (!cells) return;
+  cells = document.querySelectorAll('.cell'); // update isi cells
+}
+
+         
+         
+         
+            
+
+            for (let i = 0; i < boardSize * boardSize; i++) {
+            board.push(null);
+            }
+            let currentPlayer = 'X';
+            let gameActive = true;
+            let lastWinner = 'X'; // Default pemain pertama
+
+            // Winning combinations
+            const winningCombos = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+                [0, 4, 8], [2, 4, 6]            // diagonals
+            ];
+
+            // Check for win
+            function checkWin() {
+                return winningCombos.find(combo =>
+                    combo.every(i => board[i] === currentPlayer)
+                );
+            }
+
+            // Check for draw
+            function checkDraw() {
+                return board.every(cell => cell !== null);
+            }
+
+            // Turn indicator functions
+            function showBothBars() {
+                turnIndicator.classList.remove('show-red', 'show-blue');
+                turnIndicator.classList.add('show-both');
+            }
+
+            function showRedBar() {
+                turnIndicator.classList.remove('show-blue', 'show-both');
+                turnIndicator.classList.add('show-red');
+            }
+
+            function showBlueBar() {
+                turnIndicator.classList.remove('show-red', 'show-both');
+                turnIndicator.classList.add('show-blue');
+            }
+
+            // Update game status
+            function updateStatus(message) {
+                if (!gameActive && !message) return;
+
+                if (message) {
+                    status.textContent = message;
+                    return;
+                }
+
+                status.textContent = 'Giliran pemain: ' + currentPlayer;
+                status.classList.remove('text-red-600', 'text-blue-600', 'animate-pulse', 'font-extrabold', 'text-purple-700', 'font-semibold');
+                status.classList.add('text-gray-700', 'font-semibold');
+
+                if (currentPlayer === 'X') {
+                    showBothBars();
+                } else {
+                    showBothBars();
+                }
+            }
+
+function handleCellClick(e, isFromAI = false) {
+  if (!gameActive || (!canClick && !isFromAI)) {
+    if (!isFromAI) showToast("Chill bro 😎 jangan spam!");
+    return;
+  }
+
+  const index = +e.target.dataset.index;
+  if (board[index]) return;
+  lastMove = index;
+  lastMoveBy = currentPlayer;
+
+  // COOLDOWN buat player aja
+  if (!isFromAI) {
+    canClick = false;
+    cells.forEach(c => c.classList.add('pointer-events-none')); // disable anim klik
+    setTimeout(() => {
+      canClick = true;
+      cells.forEach(c => c.classList.remove('pointer-events-none'));
+    }, 500);
+  }
+  
+  // ✅ Game baru dimulai
+  if (!hasGameStarted) {
+  hasGameStarted = true;
+  preventSwitchTurn = true;
+  switchTurnButton.classList.add('hidden');  // ❌ Sembunyikan SwitchTurn
+  undoButton.classList.remove('hidden');     // ✅ Tampilkan Undo
+  console.log("Permainan dimulai, switchTurn dimatikan");
+}
+
+  // === Langkah player ===
+  board[index] = currentPlayer;
+  lastMove = index;
+  lastMoveBy = currentPlayer;
+  e.target.innerHTML = '';
+  e.target.classList.remove('hint-cell', 'hint-x', 'hint-o');
+  e.target.textContent = currentPlayer;
+  e.target.classList.add('disabled', 'cursor-default', 'font-extrabold', 'select-none');
+  e.target.classList.remove('cursor-pointer', 'hover:scale-110', 'hover:shadow-xl');
+
+  if (currentPlayer === 'X') {
+    e.target.classList.replace('text-gray-900', 'text-red-600');
+  } else {
+    e.target.classList.replace('text-gray-900', 'text-blue-600');
+  }
+
+  e.target.style.transition = 'transform 0.3s ease';
+  e.target.style.transform = 'scale(1.1)';
+  setTimeout(() => e.target.style.transform = 'scale(1)', 300);
+
+  // === Cek menang ===
+  const winningCombo = checkWin();
+  if (winningCombo) {
+    gameActive = false;
+    highlightWin(winningCombo);
+    status.textContent = 'Pemain ' + currentPlayer + ' MENANG! 🎉';
+    status.classList.remove('text-gray-700', 'text-purple-700', 'font-semibold');
+    lastWinner = currentPlayer;
+
+    if (currentPlayer === 'X') {
+      status.classList.add('text-red-600', 'animate-pulse', 'font-extrabold');
+    } else {
+      status.classList.add('text-blue-600', 'animate-pulse', 'font-extrabold');
+    }
+
+    showBothBars();
+
+    // Sistem HP
+    const before = currentPlayer === 'X' ? hpO : hpX;
+    const damage = 10;
+    const after = Math.max(0, before - damage);
+    if (currentPlayer === 'X') hpO = after; else hpX = after;
+
+    updateHP(currentPlayer === 'X' ? 'O' : 'X', after);
+    updateLostHP(currentPlayer === 'X' ? 'O' : 'X', after, before);
+    showDamage(currentPlayer === 'X' ? 'O' : 'X', damage);
+
+    cells.forEach(c => c.onclick = null);
+    return;
+  }
+
+  // === Cek draw ===
+  if (checkDraw()) {
+    gameActive = false;
+    status.textContent = 'Permainan seri!';
+    status.classList.remove('text-gray-700', 'text-red-600', 'text-blue-600', 'animate-pulse', 'font-extrabold');
+    status.classList.add('text-purple-700', 'font-semibold');
+    showBothBars();
+    return;
+  }
+
+  // === Ganti pemain ===
+  currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+  updateStatus();
+  updateUndoButtonState();
+
+  // === AI jalan kalau perlu ===
+  if (isVersusAI && gameActive && currentPlayer === aiPlayer) {
+    setTimeout(() => {
+      handleAIMove();
+    }, 500);
+  }
+
+  updateHelpButtonState();
+  updateSwitchButtonState();
+  updateUndoButtonState();
+}
+
+            // Highlight winning cells
+            function highlightWin(combo) {
+                combo.forEach(i => {
+                    const cell = cells[i];
+                    cell.classList.add(currentPlayer === 'X' ? 'pulse-red' : 'pulse-blue');
+                });
+            }
+
+
+function playAgain() {
+  generateBoard(boardSize);
+  hasGameStarted = false;
+  preventSwitchTurn = true;
+  aiStarted = currentPlayer === aiPlayer;
+  board.fill(null);
+  gameActive = true;
+  currentPlayer = lastWinner;
+  hintUsedX = false;
+  hintUsedO = false;
+  undoUsedX = false;
+  undoUsedO = false;
+  lastMove = null;
+
+  const btn = document.getElementById('switchTurnButton');
+  if (btn) {
+    btn.classList.remove('pointer-events-none', 'opacity-50');
+    btn.title = 'Undo tersedia setelah langkah';
+  }
+
+  // Reset tampilan board
+  cells.forEach(c => {
+    c.innerHTML = '';
+    c.classList.remove(
+      'disabled', 'cursor-default', 'font-extrabold', 'select-none',
+      'pulse-red', 'pulse-blue', 'text-red-600', 'text-blue-600',
+      'hint-cell', 'hint-x', 'hint-o'
+    );
+    c.classList.add('cursor-pointer', 'hover:scale-110', 'hover:shadow-xl', 'text-gray-900');
+    c.onclick = handleCellClick;
+  });
+
+  updateStatus();
+  updateHelpButtonState();
+  updateSwitchButtonState();
+  updateUndoButtonState();
+
+  // Jika AI dapat giliran pertama
+  if (isVersusAI && currentPlayer === aiPlayer) {
+    setTimeout(handleAIMove, 500);
+  }
+}
+            
+
+            // AI Logic
+    function handleAIMove() {
+        if (!gameActive || currentPlayer !== aiPlayer) return;
+        // 1. Cari langkah menang
+        let moveIndex = findWinningMove(aiPlayer);
+        
+        // 2. Cari langkah blokir lawan
+        if (moveIndex === undefined) {
+            const opponent = aiPlayer === 'X' ? 'O' : 'X';
+            moveIndex = findWinningMove(opponent);
+        }
+        
+        // 3. Ambil tengah jika kosong
+        if (moveIndex === undefined && board[4] === null) {
+            moveIndex = 4;
+        }
+        
+        // 4. Ambil sudut acak
+        if (moveIndex === undefined) {
+            const corners = [0, 2, 6, 8].filter(i => board[i] === null);
+            if (corners.length > 0) {
+                moveIndex = corners[Math.floor(Math.random() * corners.length)];
+            }
+        }
+        
+        // 5. Ambil sisi acak
+        if (moveIndex === undefined) {
+            const sides = [1, 3, 5, 7].filter(i => board[i] === null);
+            if (sides.length > 0) {
+                moveIndex = sides[Math.floor(Math.random() * sides.length)];
+            }
+        }
+        
+        if (moveIndex !== undefined) {
+            cells[moveIndex].click();
+        }
+        updateUndoButtonState(); // ❗️ panggil di akhir
+    }
+
+// AI sekarang bisa bermain sebagai X atau O
+    function toggleAI() {
+        isVersusAI = !isVersusAI;
+        if (isVersusAI) {
+             // Fleksibel
+            updateStatus('Mode AI Aktif! (AI sebagai ' + aiPlayer + ')');
+            
+            if (currentPlayer === aiPlayer) {
+                setTimeout(handleAIMove, 800);
+            }
+        }
+    }
+
+            // Find winning/blocking move
+            function findWinningMove(player) {
+                for (const combo of winningCombos) {
+                    let countPlayer = 0;
+                    let emptyPos = -1;
+                    for (const i of combo) {
+                        if (board[i] === player) {
+                            countPlayer++;
+                        } else if (board[i] === null) {
+                            emptyPos = i;
+                        }
+                    }
+                    if (countPlayer === 2 && emptyPos !== -1) {
+                        return emptyPos;
+                    }
+                }
+                return undefined;
+            }
+            
+function switchTurn() {
+  if (hasGameStarted) {
+    showToast("Permainan sudah dimulai, tidak bisa ganti giliran");
+    return;
+  }
+
+  [playerMark, aiPlayer] = [aiPlayer, playerMark];
+  currentPlayer = playerMark;
+  lastWinner = playerMark;
+
+  updateStatus('Kamu sekarang jadi: ' + playerMark);
+  updateHelpButtonState();
+  updateSwitchButtonState();
+}
+
+function updateSwitchButtonState() {
+  const btn = document.getElementById('switchTurnButton');
+  const overlay = document.getElementById('switchOverlay');
+  if (!btn || !overlay) return;
+
+  // ❌ Hanya disable jika tombolnya benar-benar Switch Turn
+  const isSwitchTurn = btn.title === 'Tukar giliran';
+
+  if (hasGameStarted && isSwitchTurn) {
+    btn.classList.add('disabled-button');
+    overlay.classList.remove('hidden');
+  } else {
+    btn.classList.remove('disabled-button');
+    overlay.classList.add('hidden');
+  }
+}
+
+
+document.getElementById('resetTotal').onclick = () => {
+  skorPlayer = skorAI = 0;
+  hpX = hpO = 100;
+  updateHPUI();
+  updateHP('X', hpX);
+  updateHP('O', hpO);
+
+  hasGameStarted = false;
+  preventSwitchTurn = false;
+  board.fill(null);
+  gameActive = true;
+  currentPlayer = playerMark;
+  lastWinner = playerMark;
+  hintUsedX = false;
+  hintUsedO = false;
+  undoUsedX = false;
+  undoUsedO = false;
+  lastMove = null;
+undoButton.classList.add('hidden');
+switchTurnButton.classList.remove('hidden');
+  
+
+  cells.forEach(c => {
+    c.innerHTML = '';
+    c.classList.remove(
+      'disabled', 'cursor-default', 'font-extrabold', 'select-none',
+      'pulse-red', 'pulse-blue', 'text-red-600', 'text-blue-600',
+      'hint-cell', 'hint-x', 'hint-o'
+    );
+    c.classList.add('cursor-pointer', 'hover:scale-110', 'hover:shadow-xl', 'text-gray-900');
+    c.onclick = handleCellClick;
+  });
+
+  updateStatus("Permainan di-reset. Kamu sekarang: " + playerMark);
+  updateHelpButtonState();
+  updateSwitchButtonState();
+};
+
+
+
+
+function highlightPlayerHint() {
+    console.log("bantuan dipencet");
+    if (!gameActive || isVersusAI) {
+        showToast('Fitur bantuan tidak tersedia saat ini');
+        return;
+    }
+
+    if ((currentPlayer === 'X' && hintUsedX) || (currentPlayer === 'O' && hintUsedO)) {
+        showToast('Kamu sudah pakai bantuan di ronde ini');
+        return;
+    }
+
+    const player = currentPlayer;
+    const opponent = player === 'X' ? 'O' : 'X';
+    let hintIndex;
+
+    // Cari langkah menang
+    hintIndex = findWinningMove(player);
+
+    // Kalau gak ada, cari blok lawan
+    if (hintIndex === undefined) {
+        hintIndex = findWinningMove(opponent);
+    }
+
+    if (hintIndex !== undefined && board[hintIndex] === null) {
+  // Tampilkan bantuan ke user
+  cells[hintIndex].innerHTML = currentPlayer === 'X'
+    ? '<span class="hint-x">X</span>'
+    : '<span class="hint-o">O</span>';
+
+  // Tandai bahwa player sudah pakai bantuan
+  if (currentPlayer === 'X') {
+    hintUsedX = true;
+  } else {
+    hintUsedO = true;
+  }
+
+  updateHelpButtonState();
+} else {
+  // Ga ada yang bisa dibantu, kasih feedback
+  showToast("Belum ada strategi yang bisa dibantu sekarang!");
+}
+  helpButton.classList.add('disabled-button');
+    helpButton.disabled = true;
+}
+
+
+function updateHelpButtonState() {
+  const playerHintUsed = currentPlayer === 'X' ? hintUsedX : hintUsedO;
+
+  if (playerHintUsed || !canHelpPlayer()) {
+    helpButton.disabled = true;
+    helpButton.classList.add('disabled-button');
+    helpOverlay.classList.remove('hidden'); // Overlay aktif
+  } else {
+    helpButton.disabled = false;
+    helpButton.classList.remove('disabled-button');
+    helpOverlay.classList.add('hidden'); // Overlay nonaktif
+  }
+}
+
+helpOverlay.addEventListener('click', () => {
+  const playerHintUsed = currentPlayer === 'X' ? hintUsedX : hintUsedO;
+  if (playerHintUsed) {
+    showToast("Kamu sudah menggunakan bantuan di ronde ini!");
+  } else {
+    showToast("Belum ada strategi yang bisa dibantu sekarang!");
+  }
+});
+
+function canHelpPlayer() {
+  if (!gameActive || isVersusAI) return false;
+
+  const player = currentPlayer;
+  const opponent = player === 'X' ? 'O' : 'X';
+
+  return (
+    findWinningMove(player) !== undefined ||
+    findWinningMove(opponent) !== undefined
+  );
+}
+    
+function handleUndo() {
+  if (!hasGameStarted || !gameActive) return;
+
+  // Sudah dipakai?
+  if ((currentPlayer === 'X' && undoUsedX) || (currentPlayer === 'O' && undoUsedO)) {
+    showToast("Undo sudah terpakai 😬");
+    return;
+  }
+
+  // Nggak ada langkah untuk di-undo
+  if (lastMove === null || board[lastMove] !== currentPlayer) {
+    showToast("Tidak ada langkah yang bisa di-undo ❌");
+    return;
+  }
+
+  // Reset board
+  board[lastMove] = null;
+
+  // Ambil cell-nya
+  const cell = cells[lastMove];
+  cell.innerHTML = '';
+  cell.classList.remove(
+    'disabled', 'cursor-default', 'font-extrabold', 'select-none',
+    'text-red-600', 'text-blue-600'
+  );
+  cell.classList.add('cursor-pointer', 'hover:scale-110', 'hover:shadow-xl', 'text-gray-900');
+
+  // Reset langkah
+  lastMove = null;
+
+  // Tanda udah undo
+  if (currentPlayer === 'X') undoUsedX = true;
+  else undoUsedO = true;
+
+  // Update tombol hint & undo
+  updateHelpButtonState();
+  updateUndoButtonState();
+
+  // Toast info
+  showToast("Langkah terakhir dibatalkan ✅");
+}
+
+
+function updateUndoButtonState() {
+  const btn = document.getElementById('switchTurnButton');
+  if (!btn || !hasGameStarted) return;
+
+  const sudahUndo = currentPlayer === 'X' ? undoUsedX : undoUsedO;
+
+  // 🔍 Cek juga: apakah langkah terakhir milik current player?
+  const canUndo = lastMove !== null && board[lastMove] === currentPlayer;
+
+  if (sudahUndo || !canUndo) {
+    btn.classList.add('pointer-events-none', 'opacity-50');
+  } else {
+    btn.classList.remove('pointer-events-none', 'opacity-50');
+  }
+}
+
+
+
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.classList.remove('opacity-0');
+  toast.classList.add('opacity-100');
+
+  setTimeout(() => {
+    toast.classList.remove('opacity-100');
+    toast.classList.add('opacity-0');
+  }, 2500); // toast ilang setelah 2.5 detik
+}
+
+
+
+// Event listeners
+            cells.forEach(cell => cell.onclick = handleCellClick);
+            resetBtn.onclick = () => {
+                playAgain();
+                updateStatus();
+                
+            };
+            document.getElementById('helpButton').addEventListener('click', highlightPlayerHint);
+            console.log('switchTurnButton:', switchTurnButton);
+            
+            
+        })();
+  </script>
+</body>
+</html>
